@@ -6,10 +6,13 @@ import hashlib
 
 app = FastAPI()
 
-# In-memory storage for uploaded data
-stored_data = {}
+# Add this root endpoint
+@app.get("/")
+async def root():
+    return {"message": "Privio Data Unifier API is running."}
 
-# Fields to anonymize (configurable)
+# Your existing code...
+# Fields to anonymize
 ANON_FIELDS = ['name', 'email']
 
 def anonymize_value(val: str) -> str:
@@ -28,8 +31,6 @@ async def upload_csv(file: UploadFile = File(...)):
     for col in ANON_FIELDS:
         if col in df.columns:
             df[col] = df[col].astype(str).apply(anonymize_value)
-
-    stored_data[file.filename] = df
 
     sample = df.head(3).to_dict(orient='records')
     return {"message": f"File '{file.filename}' uploaded and processed.", "sample_data": sample}
